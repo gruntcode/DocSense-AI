@@ -18,8 +18,8 @@ Your Friday File Sense project has been initialized with git and committed. Foll
 After creating the repository, run these commands:
 
 ```bash
-# Add the remote repository (replace YOUR_USERNAME with your GitHub username)
-git remote add origin https://github.com/YOUR_USERNAME/Friday-File-Sense.git
+# Add the remote repository
+git remote add origin https://github.com/gruntcode/Friday-File-Sense.git
 
 # Push to GitHub
 git push -u origin main
@@ -30,7 +30,7 @@ git push -u origin main
 If you prefer SSH:
 
 ```bash
-git remote add origin git@github.com:YOUR_USERNAME/Friday-File-Sense.git
+git remote add origin git@github.com:gruntcode/Friday-File-Sense.git
 git push -u origin main
 ```
 

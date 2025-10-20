@@ -220,7 +220,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📧 Contact
 
-For questions or support, please open an issue on GitHub.
+**Tony Ramirez** - [@gruntcode](https://github.com/gruntcode) - tony.ramirez@gruntcode.com
+
+For questions or support, please [open an issue](https://github.com/gruntcode/Friday-File-Sense/issues).
 
 ---
 

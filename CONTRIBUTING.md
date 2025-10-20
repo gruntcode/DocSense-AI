@@ -24,8 +24,8 @@ We welcome feature suggestions! Please open an issue with:
 
 1. **Fork the repository**
    ```bash
-   git clone https://github.com/yourusername/FridayFileSense.git
-   cd FridayFileSense
+   git clone https://github.com/gruntcode/Friday-File-Sense.git
+   cd Friday-File-Sense
    ```
 
 2. **Create a feature branch**
