@@ -1,6 +1,6 @@
-# Contributing to Friday File Sense
+# Contributing to DocSense AI
 
-Thank you for your interest in contributing to Friday File Sense! 🎉
+Thank you for your interest in contributing to DocSense AI! 🎉
 
 ## How to Contribute
 
@@ -24,8 +24,8 @@ We welcome feature suggestions! Please open an issue with:
 
 1. **Fork the repository**
    ```bash
-   git clone https://github.com/gruntcode/Friday-File-Sense.git
-   cd Friday-File-Sense
+   git clone https://github.com/gruntcode/DocSense-AI.git
+   cd DocSense-AI
    ```
 
 2. **Create a feature branch**

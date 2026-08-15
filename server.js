@@ -137,9 +137,9 @@ Please format your response in a clear, structured manner with appropriate headi
                     content: prompt
                 }
             ],
-            model: "llama-3.1-8b-instant",
+            model: process.env.GROQ_MODEL || "openai/gpt-oss-20b",
             temperature: 0.7,
-            max_tokens: 1024,
+            max_tokens: parseInt(process.env.MAX_TOKENS || "3000", 10),
             top_p: 1,
             stream: false
         });
@@ -158,7 +158,7 @@ app.get('/', (req, res) => {
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'OK', message: 'Friday File Sense API is running' });
+    res.json({ status: 'OK', message: 'DocSense AI API is running' });
 });
 
 // Clear all temporary files endpoint
@@ -372,7 +372,7 @@ app.use((error, req, res, next) => {
 
 // Start server
 app.listen(PORT, () => {
-    console.log(`🚀 Friday File Sense server running on http://localhost:${PORT}`);
+    console.log(`🚀 DocSense AI server running on http://localhost:${PORT}`);
     console.log(`📁 Upload endpoint: http://localhost:${PORT}/api/analyze`);
     console.log(`🤖 AI-powered file analysis ready`);
     
