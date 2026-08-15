@@ -2,13 +2,13 @@
 
 ## 📦 Repository is Ready!
 
-Your Friday File Sense project has been initialized with git and committed. Follow these steps to push to GitHub:
+Your DocSense AI project has been initialized with git and committed. Follow these steps to push to GitHub:
 
 ## Step 1: Create a New Repository on GitHub
 
 1. Go to [GitHub](https://github.com/new)
-2. Repository name: `Friday-File-Sense` (or your preferred name)
-3. Description: `AI-powered document analysis using Groq Cloud and Llama-3.1-8B-instant`
+2. Repository name: `DocSense-AI` (or your preferred name)
+3. Description: `AI-powered document analysis using Groq Cloud and GPT-OSS 20B`
 4. Choose **Public** or **Private**
 5. **DO NOT** initialize with README, .gitignore, or license (we already have these)
 6. Click **Create repository**
@@ -19,7 +19,7 @@ After creating the repository, run these commands:
 
 ```bash
 # Add the remote repository
-git remote add origin https://github.com/gruntcode/Friday-File-Sense.git
+git remote add origin https://github.com/gruntcode/DocSense-AI.git
 
 # Push to GitHub
 git push -u origin main
@@ -30,7 +30,7 @@ git push -u origin main
 If you prefer SSH:
 
 ```bash
-git remote add origin git@github.com:gruntcode/Friday-File-Sense.git
+git remote add origin git@github.com:gruntcode/DocSense-AI.git
 git push -u origin main
 ```
 
@@ -52,7 +52,7 @@ Your repository is now live on GitHub. Share it with the world!
 On your GitHub repository page, add topics like:
 - `ai`
 - `groq`
-- `llama`
+- `gpt-oss`
 - `document-analysis`
 - `file-analyzer`
 - `nodejs`

@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Friday File Sense - AI File Analyzer</title>
+    <title>DocSense AI - AI File Analyzer</title>
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Renders the model's markdown (headings, tables, lists) instead of showing it raw.
+         DOMPurify sanitizes it first, since the analysis text derives from uploaded file content. -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -51,6 +55,100 @@
         #resultsContent {
             line-height: 1.7;
         }
+
+        /* Markdown rendered from the model's analysis. Tailwind's CDN build has no
+           typography plugin, so these elements need explicit styling. */
+        .analysis-md h1,
+        .analysis-md h2,
+        .analysis-md h3,
+        .analysis-md h4 {
+            font-weight: 700;
+            color: #111827;
+            line-height: 1.3;
+            margin: 1.4em 0 0.6em;
+        }
+        .analysis-md h1 { font-size: 1.3rem; }
+        .analysis-md h2 { font-size: 1.15rem; }
+        .analysis-md h3 { font-size: 1.05rem; }
+        .analysis-md h4 { font-size: 0.95rem; }
+        .analysis-md > *:first-child { margin-top: 0; }
+        .dark .analysis-md h1,
+        .dark .analysis-md h2,
+        .dark .analysis-md h3,
+        .dark .analysis-md h4 { color: #f9fafb; }
+
+        .analysis-md p { margin: 0.7em 0; }
+        .analysis-md strong { font-weight: 600; color: #111827; }
+        .dark .analysis-md strong { color: #f9fafb; }
+
+        .analysis-md ul,
+        .analysis-md ol {
+            margin: 0.7em 0;
+            padding-left: 1.4em;
+        }
+        .analysis-md ul { list-style: disc; }
+        .analysis-md ol { list-style: decimal; }
+        .analysis-md li { margin: 0.3em 0; }
+
+        /* Tables scroll on their own so a wide table never scrolls the page */
+        .analysis-md .table-scroll {
+            overflow-x: auto;
+            margin: 1em 0;
+        }
+        .analysis-md table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 0.875em;
+        }
+        .analysis-md th,
+        .analysis-md td {
+            border: 1px solid #e5e7eb;
+            padding: 0.5em 0.75em;
+            text-align: left;
+            vertical-align: top;
+        }
+        .analysis-md th {
+            background: #f9fafb;
+            font-weight: 600;
+            color: #111827;
+            white-space: nowrap;
+        }
+        .dark .analysis-md th,
+        .dark .analysis-md td { border-color: #374151; }
+        .dark .analysis-md th { background: #1f2937; color: #f9fafb; }
+        .dark .analysis-md tbody tr:nth-child(even) { background: rgba(255, 255, 255, 0.02); }
+        .analysis-md tbody tr:nth-child(even) { background: #fcfcfd; }
+
+        .analysis-md code {
+            background: #f3f4f6;
+            padding: 0.15em 0.4em;
+            border-radius: 0.25rem;
+            font-size: 0.875em;
+        }
+        .dark .analysis-md code { background: #374151; }
+        .analysis-md pre {
+            background: #f3f4f6;
+            padding: 0.9em;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            margin: 1em 0;
+        }
+        .dark .analysis-md pre { background: #1f2937; }
+        .analysis-md pre code { background: none; padding: 0; }
+
+        .analysis-md blockquote {
+            border-left: 3px solid #8b5cf6;
+            padding-left: 1em;
+            margin: 1em 0;
+            color: #4b5563;
+        }
+        .dark .analysis-md blockquote { color: #9ca3af; }
+        .analysis-md hr {
+            border: 0;
+            border-top: 1px solid #e5e7eb;
+            margin: 1.5em 0;
+        }
+        .dark .analysis-md hr { border-top-color: #374151; }
         /* AI Avatar Styling */
         .ai-avatar {
             background: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
@@ -75,7 +173,7 @@
                         <i data-feather="zap" class="text-white w-6 h-6 ai-avatar-icon"></i>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold text-gray-800 dark:text-white">Friday File Sense</h1>
+                        <h1 class="text-xl font-bold text-gray-800 dark:text-white">DocSense AI</h1>
                         <p class="text-xs text-gray-500 dark:text-gray-400">AI-Powered Analysis</p>
                     </div>
                 </div>
@@ -95,7 +193,7 @@
                         </div>
                     </div>
                     <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Intelligent Document Analysis</h2>
-                    <p class="text-gray-600 dark:text-gray-400">Your AI assistant for instant file insights • Powered by Llama 3.1-8B</p>
+                    <p class="text-gray-600 dark:text-gray-400">Your AI assistant for instant file insights • Powered by GPT-OSS 20B</p>
                 </div>
 
                 <!-- Upload Section -->
@@ -104,7 +202,7 @@
                         <i data-feather="upload-cloud" class="w-16 h-16 text-primary-500 mb-4"></i>
                         <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">Drag & Drop Files Here</h3>
                         <p class="text-gray-500 dark:text-gray-400 mb-6">or click to browse your files</p>
-                        <input type="file" id="fileInput" class="hidden" accept=".pdf,.csv,.txt,.docx,.xlsx">
+                        <input type="file" id="fileInput" class="hidden" multiple accept=".pdf,.csv,.txt,.docx,.xlsx">
                         <label for="fileInput" class="cursor-pointer bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 text-white px-6 py-2 rounded-lg font-medium transition-all duration-300 shadow-lg hover:shadow-xl">
                             Select Files
                         </label>
@@ -120,7 +218,7 @@
                     </div>
                     <button id="analyzeBtn" class="mt-6 w-full bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2">
                         <i data-feather="zap" class="w-5 h-5"></i>
-                        <span>Analyze with Friday AI</span>
+                        <span>Analyze with DocSense AI</span>
                     </button>
                 </div>
 
@@ -156,7 +254,7 @@
         <!-- Footer -->
         <footer class="bg-white dark:bg-gray-800 py-6">
             <div class="container mx-auto px-4 text-center">
-                <p class="text-gray-500 dark:text-gray-400 text-sm">Friday File Sense • Powered by Groq AI & Llama 3.1-8B</p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">DocSense AI • Powered by Groq AI & GPT-OSS 20B</p>
             </div>
         </footer>
     </div>
@@ -186,6 +284,30 @@
         });
         
         // File upload and handling
+        // Turn the model's markdown into sanitized HTML. Falls back to escaped
+        // plain text if either CDN library fails to load, so results always show.
+        function renderAnalysis(markdown) {
+            const text = markdown || '';
+            if (typeof marked === 'undefined' || typeof DOMPurify === 'undefined') {
+                const escaped = text
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+                return escaped.replace(/\n/g, '<br>');
+            }
+            const clean = DOMPurify.sanitize(marked.parse(text, { gfm: true, breaks: true }));
+            // Wrap tables so wide ones scroll themselves instead of the page.
+            const holder = document.createElement('div');
+            holder.innerHTML = clean;
+            holder.querySelectorAll('table').forEach((table) => {
+                const wrap = document.createElement('div');
+                wrap.className = 'table-scroll';
+                table.parentNode.insertBefore(wrap, table);
+                wrap.appendChild(table);
+            });
+            return holder.innerHTML;
+        }
+
         const fileInput = document.getElementById('fileInput');
         const filePreview = document.getElementById('filePreview');
         const fileList = document.getElementById('fileList');
@@ -326,7 +448,7 @@
             loadingSpinner.classList.remove('hidden');
             analyzeBtn.disabled = true;
             resultsSection.classList.remove('hidden');
-            resultsContent.innerHTML = '<p class="text-gray-500 dark:text-gray-400 italic">Friday File Sense is analyzing your files...</p>';
+            resultsContent.innerHTML = '<p class="text-gray-500 dark:text-gray-400 italic">DocSense AI is analyzing your files...</p>';
             
             try {
                 // Create FormData for file upload
@@ -360,7 +482,7 @@
                         if (fileResult.error) {
                             resultsHtml += `<div class="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">\n                                <h4 class="font-semibold text-red-800 dark:text-red-200 mb-2">\n                                    <i data-feather="alert-circle" class="w-4 h-4 inline mr-1"></i>\n                                    Error processing ${fileResult.fileName}\n                                </h4>\n                                <p class="text-red-600 dark:text-red-300 text-sm">${fileResult.error}</p>\n                            </div>`;
                         } else {
-                            resultsHtml += `<div class="mb-6 ${index > 0 ? 'border-t border-gray-200 dark:border-gray-600 pt-6' : ''}">\n                                <div class="flex items-center justify-between mb-3">\n                                    <h4 class="font-semibold text-gray-800 dark:text-gray-100 flex items-center">\n                                        <i data-feather="file-text" class="w-4 h-4 mr-2 text-primary-500"></i>\n                                        ${fileResult.fileName}\n                                    </h4>\n                                    <span class="text-xs text-gray-500 dark:text-gray-300">${formatFileSize(fileResult.fileSize)}</span>\n                                </div>\n                                <div class="prose dark:prose-invert max-w-none text-sm text-gray-700 dark:text-gray-200 leading-relaxed">\n                                    ${fileResult.analysis.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong class="text-gray-900 dark:text-gray-50">$1</strong>')}\n                                </div>\n                            </div>`;
+                            resultsHtml += `<div class="mb-6 ${index > 0 ? 'border-t border-gray-200 dark:border-gray-600 pt-6' : ''}">\n                                <div class="flex items-center justify-between mb-3">\n                                    <h4 class="font-semibold text-gray-800 dark:text-gray-100 flex items-center">\n                                        <i data-feather="file-text" class="w-4 h-4 mr-2 text-primary-500"></i>\n                                        ${fileResult.fileName}\n                                    </h4>\n                                    <span class="text-xs text-gray-500 dark:text-gray-300">${formatFileSize(fileResult.fileSize)}</span>\n                                </div>\n                                <div class="analysis-md max-w-none text-sm text-gray-700 dark:text-gray-200 leading-relaxed">\n                                    ${renderAnalysis(fileResult.analysis)}\n                                </div>\n                            </div>`;
                         }
                     });
                 } else {
@@ -462,7 +584,7 @@
                 // Set up PDF styling
                 doc.setFontSize(16);
                 doc.setFont(undefined, 'bold');
-                doc.text('Friday File Sense - Analysis Results', 20, 20);
+                doc.text('DocSense AI - Analysis Results', 20, 20);
                 
                 // Add timestamp
                 doc.setFontSize(10);
@@ -520,13 +642,13 @@
                     doc.setPage(i);
                     doc.setFontSize(8);
                     doc.setFont(undefined, 'normal');
-                    doc.text(`Page ${i} of ${pageCount} | Friday File Sense - AI Analysis`, 
+                    doc.text(`Page ${i} of ${pageCount} | DocSense AI - AI Analysis`, 
                              margin, pageHeight - 10);
                 }
                 
                 // Generate filename with timestamp
                 const dateStr = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-                const filename = `friday-file-sense-${dateStr}.pdf`;
+                const filename = `docsense-ai-${dateStr}.pdf`;
                 
                 // Download the PDF
                 doc.save(filename);
